@@ -1,10 +1,16 @@
 import re
 from collections import Counter
-from typing import Dict, Any
-
+from typing import Dict, List, Any
 import spacy
 
-nlp = spacy.load("es_core_news_sm")
+nlp = None  # Lazy global
+
+
+def get_nlp():
+    global nlp
+    if nlp is None:
+        nlp = spacy.load("es_core_news_sm")
+    return nlp
 
 
 def process_text(text: str) -> Dict[str, Any]:
@@ -14,8 +20,8 @@ def process_text(text: str) -> Dict[str, Any]:
     word_count = len(words)
     # Palabra más usada
     most_common = Counter(words).most_common(1)[0] if words else ("ninguna", 0)
-    # NER con spaCy en texto original
-    doc = nlp(text)
+    # NER con spaCy lazy
+    doc = get_nlp()(text)
     entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
     return {
         "word_count": word_count,
